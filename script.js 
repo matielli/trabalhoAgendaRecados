@@ -1,0 +1,62 @@
+document.addEventListener("DOMContentLoaded", () => {
+  const form = document.getElementById("formRecado");
+  const lista = document.getElementById("listaRecados");
+
+  const carregarRecados = () => {
+    const recados = JSON.parse(localStorage.getItem("recados")) || [];
+    lista.innerHTML = "";
+
+    recados.forEach((recado, index) => {
+      const li = document.createElement("li");
+      li.className = "list-group-item d-flex justify-content-between align-items-start";
+      li.innerHTML = `
+        <div>
+          <strong>De:</strong> ${recado.de}<br>
+          <strong>Para:</strong> ${recado.para}<br>
+          <strong>Mensagem:</strong> ${recado.texto}<br>
+          <small>${recado.dataHora}</small>
+        </div>
+        <button class="btn btn-sm btn-danger btn-remover" data-index="${index}">Excluir</button>
+      `;
+      lista.appendChild(li);
+    });
+  };
+
+  const salvarRecado = (recado) => {
+    const recados = JSON.parse(localStorage.getItem("recados")) || [];
+    recados.push(recado);
+    localStorage.setItem("recados", JSON.stringify(recados));
+    carregarRecados();
+  };
+
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    const de = document.getElementById("de").value.trim();
+    const para = document.getElementById("para").value.trim();
+    const texto = document.getElementById("texto").value.trim();
+
+    if (!de || !para || !texto) {
+      alert("Todos os campos são obrigatórios!");
+      return;
+    }
+
+    const dataHora = new Date().toLocaleString();
+
+    salvarRecado({ de, para, texto, dataHora });
+
+    form.reset();
+  });
+
+  lista.addEventListener("click", (e) => {
+    if (e.target.classList.contains("btn-remover")) {
+      const index = e.target.getAttribute("data-index");
+      const recados = JSON.parse(localStorage.getItem("recados")) || [];
+      recados.splice(index, 1);
+      localStorage.setItem("recados", JSON.stringify(recados));
+      $(e.target).closest("li").fadeOut(500, carregarRecados); // jQuery efeito
+    }
+  });
+
+  carregarRecados();
+});
